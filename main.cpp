@@ -1,3 +1,6 @@
+// Winter'24
+// Instructor: Diba Mirza
+// Student name:
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -40,7 +43,7 @@ int main(int argc, char** argv){
     string line, movieName;
     double movieRating;
 
-    while (getline (movieFile, line) && parseLine(line, movieName, movieRating)){
+    while (getline(movieFile, line) && parseLine(line, movieName, movieRating)){
         movies.push_back(Movie(movieName, movieRating));
     }
 
@@ -66,52 +69,48 @@ int main(int argc, char** argv){
     }
 
     vector<string> prefixes;
-    while (getline (prefixFile, line)) {
-        line = rtrim_copy(line);
+    while (getline(prefixFile, line)) {
+        if (!line.empty() && line.back() == '\r') line.pop_back();
         if (!line.empty()) prefixes.push_back(line);
     }
     prefixFile.close();
-
-    PrefixTrie trie;
-    for (int i = 0; i < (int)prefixes.size(); i++) {
-        trie.insert(prefixes[i], i);
-    }
-
-    vector<vector<Movie>> buckets(prefixes.size());
-    for (const auto& mv : movies) {
-        trie.dispatchMovieToBuckets(mv, buckets);
-    }
 
     vector<bool> has(prefixes.size(), false);
     vector<Movie> best(prefixes.size());
 
     for (int i = 0; i < (int)prefixes.size(); i++) {
-        auto& vec = buckets[i];
-        if (vec.empty()) continue;
+        vector<Movie> matches;
 
-        sort(vec.begin(), vec.end(),
+        for (const auto& mv : movies) {
+            if (mv.name.rfind(prefixes[i], 0) == 0) {
+                matches.push_back(mv);
+            }
+        }
+
+        if (matches.empty()) {
+            cout << "No movies found with prefix " << prefixes[i] << endl;
+            continue;
+        }
+
+        sort(matches.begin(), matches.end(),
              [](const Movie& a, const Movie& b){
                  if (a.rating != b.rating) return a.rating > b.rating;
                  return a.name < b.name;
              });
 
         has[i] = true;
-        best[i] = vec.front();
-    }
+        best[i] = matches.front();
 
-    for (int i = 0; i < (int)prefixes.size(); i++) {
-        if (!has[i]) {
-            cout << "No movies found with prefix " << prefixes[i] << endl;
-            continue;
-        }
-        for (const auto& mv : buckets[i]) {
+        for (const auto& mv : matches) {
             printMovieLine(mv);
         }
+
         cout << endl;
     }
 
     for (int i = 0; i < (int)prefixes.size(); i++) {
         if (!has[i]) continue;
+
         cout << "Best movie with prefix " << prefixes[i]
              << " is: " << best[i].name
              << " with rating " << fixed << setprecision(1) << best[i].rating
