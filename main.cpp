@@ -129,3 +129,32 @@ bool parseLine(string &line, string &movieName, double &movieRating) {
     }
     return true;
 }
+
+
+
+/*
+Part 3 Analysis:
+
+Let:
+n = number of movies
+m = number of prefixes
+k_i = number of movies matching the i-th prefix
+
+Time Complexity:
+For each prefix, we scan all movies to find matches, costs O(n).
+Across all prefixes,  costs O(mn).
+For each prefix, we then sort its matching movies, costs O(k_i log k_i).
+In the worst case, every movie matches every prefix (k_i = n),
+so total sorting cost becomes O(m * n log n).
+
+Therefore, the overall worst-case time complexity is:
+O(mn + m n log n).
+
+Space Complexity:
+We store all movies in a vector,  costs O(n) space.
+For each prefix, we create a temporary matches vector.
+In the worst case, this vector can contain up to n movies,
+so the additional space required is O(n).
+
+So, the overall space complexity is O(n).
+*/
